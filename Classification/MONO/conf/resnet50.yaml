@@ -1,0 +1,17 @@
+model: resnet50
+mode: big_class
+exp: MONO
+run_name: 'ResNe50_pre_trained zerocycle'
+exp_log: 'ResNet training (with Mixup)'
+dataset_dir: '/hdd_ext/kkokkobot/data/Classification/MONO_maxclip/bigclass'
+pre_trained: '/hdd_ext/yejyang/ejTransformer/kkokkobot/zero_cycle_trained/checkpoints/resnet50/ckp_best.pt'
+base_lr: 0.0001
+lr_scheduler: Cosine
+grad_clipping: 1
+n_epochs: 100
+batch_size: 64
+loss: CrossEntropy
+optim: Adam
+wd: 0.00000001
+auto_augment: False
+is_mixup: True

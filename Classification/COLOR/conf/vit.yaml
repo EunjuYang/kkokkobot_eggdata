@@ -1,0 +1,16 @@
+model: vit
+mode: big_class
+exp: COLOR
+run_name: 'ViT with Mixup with normalization & sharpening'
+exp_log: 'Vision-transformer training (with Mixup) with normalization & sharpening'
+dataset_dir: '/hdd/kkokkobot/FinalEggData/CLASSIFICATION/COLOR_BIG/bigclass'
+base_lr: 0.0001
+lr_scheduler: Cosine
+grad_clipping: 1
+n_epochs: 100
+batch_size: 28
+loss: CrossEntropy
+optim: AdamW
+wd: 0.00000001
+auto_augment: False
+is_mixup: True

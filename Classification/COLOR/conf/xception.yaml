@@ -1,0 +1,16 @@
+model: xception
+mode: big_class
+exp: COLOR
+run_name: 'xception_with_Mixup'
+exp_log: 'XCEPTION network (with Mixup), mean, stdev update, random sharpness is applied'
+dataset_dir: '/hdd/kkokkobot/FinalEggData/CLASSIFICATION/COLOR_BIG/bigclass'
+base_lr: 0.0001
+lr_scheduler: Cosine
+grad_clipping: 1
+n_epochs: 100
+batch_size: 48
+loss: CrossEntropy
+optim: AdamW
+wd: 0.00000001
+auto_augment: False
+is_mixup: True

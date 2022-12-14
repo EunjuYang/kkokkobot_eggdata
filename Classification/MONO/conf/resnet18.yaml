@@ -1,0 +1,16 @@
+model: resnet18
+mode: sub_class
+exp: MONO
+run_name: 'ResNet18'
+exp_log: 'ResNet training (with Mixup)'
+dataset_dir: '/hdd/kkokkobot/FinalEggData/CLASSIFICATION/MONO/bigclass'
+base_lr: 0.0001
+lr_scheduler: Cosine
+grad_clipping: 1
+n_epochs: 100
+batch_size: 128
+loss: CrossEntropy
+optim: Adam
+wd: 0.00000001
+auto_augment: False
+is_mixup: True

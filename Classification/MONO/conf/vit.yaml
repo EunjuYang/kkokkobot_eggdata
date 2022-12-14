@@ -1,0 +1,16 @@
+model: vit
+mode: big_class
+exp: MONO
+run_name: 'ViT with Mixup'
+exp_log: 'Vision-transformer training (with Mixup)'
+dataset_dir: '/hdd/kkokkobot/FinalEggData/CLASSIFICATION/MONO/bigclass'
+base_lr: 0.00001
+lr_scheduler: Cosine
+grad_clipping: 1
+n_epochs: 100
+batch_size: 32
+loss: CrossEntropy
+optim: AdamW
+wd: 0.00000001
+auto_augment: False
+is_mixup: True
