@@ -5,9 +5,13 @@ import os
 import json
 from IPython.display import display
 
+# 세팅
+tgt_dir = ''
+save_dir = ''
+
 # 파일 목록 가져오기
 fileList = [] # Json 파일만 가져온다
-for folderName, subfolders, filenames in os.walk('../Dataset/Crack_Dataset/clahe/'):
+for folderName, subfolders, filenames in os.walk(tgt_dir):
     for filename in filenames:
         if os.path.splitext(filename)[1] == '.json':
             fileList.append(folderName + '/' + filename)
@@ -45,24 +49,24 @@ def imgcrop(img_input, annotations, grid_size):
             a = im.crop(box)
             # 파일 저장 -> ../Dataset/Crack_Dataset/patches            
             if annotations[i][j] == 'Normal':
-                a.save("../Dataset/Crack_Dataset/clahe_patches/0/0_0/" + os.path.basename(filename) + "-" + str(i) + "-" + str(j) + file_extension)
+                a.save(save_dir + "/0/0_0/" + os.path.basename(filename) + "-" + str(i) + "-" + str(j) + file_extension)
             elif annotations[i][j] == 'Crack':
-                a.save("../Dataset/Crack_Dataset/clahe_patches/1/1_0/" + os.path.basename(filename) + "-" + str(i) + "-" + str(j) + file_extension)
+                a.save(save_dir + "/1/1_0/" + os.path.basename(filename) + "-" + str(i) + "-" + str(j) + file_extension)
             else:
-                a.save("../Dataset/Crack_Dataset/clahe_patches/2/2_0/" + os.path.basename(filename) + "-" + str(i) + "-" + str(j) + file_extension)
+                a.save(save_dir + "/2/2_0/" + os.path.basename(filename) + "-" + str(i) + "-" + str(j) + file_extension)
 
 import shutil
 
 # ../Dataset/Crack_Dataset/patches 폴더가 있으면 지우고 없으면 만든다
-if os.path.isdir('../Dataset/Crack_Dataset/clahe_patches'):
-    shutil.rmtree('../Dataset/Crack_Dataset/clahe_patches')
-os.mkdir('../Dataset/Crack_Dataset/clahe_patches')
-os.mkdir('../Dataset/Crack_Dataset/clahe_patches/0')
-os.mkdir('../Dataset/Crack_Dataset/clahe_patches/1')
-os.mkdir('../Dataset/Crack_Dataset/clahe_patches/2')
-os.mkdir('../Dataset/Crack_Dataset/clahe_patches/0/0_0')
-os.mkdir('../Dataset/Crack_Dataset/clahe_patches/1/1_0')
-os.mkdir('../Dataset/Crack_Dataset/clahe_patches/2/2_0')
+if os.path.isdir(save_dir):
+    shutil.rmtree(save_dir)
+os.mkdir(save_dir)
+os.mkdir(save_dir + '/0')
+os.mkdir(save_dir + '/1')
+os.mkdir(save_dir + '/2')
+os.mkdir(save_dir + '/0/0_0')
+os.mkdir(save_dir + '/1/1_0')
+os.mkdir(save_dir + '/2/2_0')
 
 for files in fileList:
     grid_size, annotations = read_json(files)
