@@ -45,13 +45,7 @@ $ docker run -it --gpus="device=0" -v [datapath]:/root/sourceCode/data kkokkobot
 $ python main.py --checkpoint [checkpoint 경로] --tgt_dir [데이터셋 경로] (--num_examples [표시할 예시 개수])
 ```
 
-#### 1. 컨테이너 안에서 모델을 활용하여 탐지 및 분류하기
-```shell
-$ cd /root/sourceCode
-$ python main.py --checkpoint ckp_best.pt --tgt_dir ./data
-```
-
-#### 2. 라벨링 툴을 활용하여 Patch 데이터셋 라벨 생성
+#### 1. 라벨링 툴을 활용하여 Patch 데이터셋 라벨 생성
 해당 라벨링 툴은 PyQT를 활용하기 때문에 Desktop 환경에서 실행되어야합니다.
 해당 툴은 데이터셋이 저장된 서버와 별도의 컴퓨터에서 SSH를 통해 접속하여 사용할 것을 전제로 작성되었으며, 데이터셋이 다음과 같은 형태로 저장되어 있을 것을 요구합니다.
 
@@ -82,7 +76,7 @@ Root 경로
 $ python feedback.py
 ```
 
-#### 3. 본 모델용 학습 데이터셋 생성
+#### 2. 본 모델용 학습 데이터셋 생성
 본 모델은 Patch 기반 학습 때문에 학습을 위해 별도의 데이터셋을 필요로합니다.
 앞서 라벨링 툴을 사용하여 라벨이 생성된 데이터셋을 필요로 하고 이를 패치 단위로 나누어 저장하는 툴을 활용하여 패치 데이터셋을 생성합니다
 
@@ -112,6 +106,19 @@ $ python feedback.py
 $ python PatchDatasetCreator.py
 ```
 
-#### 4. 본 모델 학습
+#### 3. 본 모델 학습
 
-#### 5. 본 모델 탐지 및 분류 데이터셋 생성
+#### 4. 본 모델 탐지 및 분류 데이터셋 생성
+본 모델을 활용하여 균열을 탐지 및 분류하기 위해서는 데이터셋을 알맞은 형태로 가공할 필요가 있다.
+DatasetCreator.py 파일 내의 타겟 데이터셋 경로 및 저장 경로를 알맞게 설정한 다음 실행하면 탐지 및 분류에 필요한 형태로 데이터셋이 가공된다.
+이 때, 타겟 데이터셋은 앞선 2에서의 타겟 데이터셋과 같은 형태로 폴더 구조가 짜여있어야한다.
+
+```shell
+$ python DatasetCreator.py
+```
+
+#### 5. 컨테이너 안에서 모델을 활용하여 탐지 및 분류하기
+```shell
+$ cd /root/sourceCode
+$ python main.py --checkpoint ckp_best.pt --tgt_dir ./data
+```
