@@ -9,6 +9,18 @@ import numpy as np
 import random
 import mlflow
 import os
+import torchvision.transforms.functional as F
+import numbers
+
+class SquarePad:
+	def __call__(self, image):
+		w, h = image.size
+		max_wh = np.max([w, h])
+		hp = int((max_wh - w) / 2)
+		vp = int((max_wh - h) / 2)
+		padding = (hp, vp, hp, vp)
+		return F.pad(image, padding, 0, 'constant')
+
 
 if __name__ == '__main__':
 
@@ -50,7 +62,7 @@ if __name__ == '__main__':
 
     # train big class or subclass
     if conf.mode == "big_class":
-        labels = ['정상', '크랙', '이물질', '기형', '외형(탈색)']
+        labels = ['1_정상', '2_크랙',  '3_이물질',  '4_탈색',  '5_외형이상',  '6_잠재크랙']
     else:
         labels = ['핑크', '갈색', '옅은갈색', '진한갈색', '미세크랙', '완전크랙', '원형크랙', '일자형크랙', '깃털', '닭분변', '점박이', '계란유출', '곰보', '일반기형', '심한기형', '길쭉한계란', '사포란', '부분탈색', '위아래탈색', '칼슘침전물']
 
@@ -61,19 +73,34 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # data transformation
     img_size = 224
-    transform_ = transforms.Compose([transforms.Resize([img_size, img_size]),
-                                     transforms.RandomAdjustSharpness(6, p=1.0),
-                                     # transforms.RandomAutocontrast(p=1.0),
+    transform_ = transforms.Compose([SquarePad(),
+                                     transforms.Resize([img_size, img_size]),
+                                     # transforms.RandomAutocontrast(),
+                                     # transforms.RandomAdjustSharpness(sharpness_factor=3),
                                      transforms.ToTensor(),
                                      transforms.Normalize(
-                                         [0.5551, 0.4777, 0.4163],
-                                         [0.2293, 0.1675, 0.1997])])
+                                         [0.5522, 0.4713, 0.4157],
+                                         [0.2271, 0.1678, 0.1960]),
+                                     ])
+    transform_test = transforms.Compose([SquarePad(),
+                                     transforms.Resize([img_size, img_size]),
+                                     transforms.ToTensor(),
+                                     transforms.Normalize(
+                                         [0.5522, 0.4713, 0.4157],
+                                         [0.2271, 0.1678, 0.1960]),
+                                     ])
 
     ###################################################
     # Data Preparation
     ###################################################
     train_dataset = ImageFolder(root=conf.dataset_dir+'/train', transform=transform_)
-    test_dataset = ImageFolder(root=conf.dataset_dir+'/test', transform=transform_)
+    test_dataset = ImageFolder(root=conf.dataset_dir+'/test', transform=transform_test)
+
+    train_dataset.class_to_idx = {l: idx for idx, l in enumerate(labels)}
+    test_dataset.class_to_idx = {l: idx for idx, l in enumerate(labels)}
+
+    print(train_dataset.class_to_idx)
+    print(test_dataset.class_to_idx)
 
     n_train = int(len(train_dataset) * 0.9)
     n_val = len(train_dataset) - n_train
@@ -103,7 +130,7 @@ if __name__ == '__main__':
         print("Use ", torch.cuda.device_count(), "GPUs!")
         model = torch.nn.DataParallel(model)
 
-    if conf.pre_trained is not None:
+    if conf.pre_trained != '':
         print('Pre-trained model is loaded from ' + conf.pre_trained)
         state_dict = torch.load(conf.pre_trained)
         model.load_state_dict(state_dict, strict=False)

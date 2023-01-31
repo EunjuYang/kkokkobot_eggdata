@@ -1,0 +1,9 @@
+model: swin
+mode: big_class
+exp: COLOR
+run_name: 'inference'
+exp_log: 'inference'
+dataset_dir: '/hdd_ext/kkokkobot/TTAFinal/preprocess_pipeline/230127'
+checkpoint: '/hdd_ext/kkokkobot/model/Classification/COLOR/checkpoints/swin/preprocess_with_latent_crack/ckp_best.pt'
+inference_csv: '/hdd_ext/kkokkobot/TTAFinal/preprocess_pipeline/컬러사진/230127/230127.csv'
+batch_size: 24

@@ -96,32 +96,33 @@ def construct_img_folder(root_dir, tgt_dir, is_big_class, train_ratio):
     wr_tr = csv.writer(f_tr)
     wr_ts = csv.writer(f_ts)
 
-    num_big_classes = len(os.listdir(root_dir))
+    big_classes = os.listdir(root_dir)
+    num_big_classes = len(big_classes)
+    threshold = train_ratio * 10
     for big in range(num_big_classes):
-        big_str = str(big)
-        sub_classes = os.listdir(root_dir+'/'+ big_str)
+        big_str = big_classes[big]
+        os.makedirs(dir + '/train/' + big_str, exist_ok=True)
+        os.makedirs(dir + '/test/' + big_str, exist_ok=True)
 
-        for sub in range(len(sub_classes)):
-            sub_str = str(sub)
-            origin_path =root_dir+'/'+big_str+'/'+big_str + '_' + sub_str
-            img_list = os.listdir(origin_path)
-            print('[*] processing ' + origin_path + ' as label: ' + str(label))
-            os.makedirs(dir + '/train/' + str(label), exist_ok=True)
-            os.makedirs(dir + '/test/' + str(label), exist_ok=True)
+        origin_path =root_dir+'/'+big_str
+        img_list = os.listdir(origin_path)
+        print('[*] processing ' + origin_path + ' as label: ' + big_str)
 
-            for i, img_name in enumerate(tqdm(img_list)):
+        for i, img_name in enumerate(tqdm(img_list)):
+            # Copy image to target dir (instead of simple copy, we open and convert to RGB)
 
-                # Copy image to target dir (instead of simple copy, we open and convert to RGB)
-                dir_path = dir + '/train' if i <= len(img_list) * train_ratio else dir + '/test'
-                image = Image.open(origin_path + '/' + img_name).convert("RGB")
-                image.save(dir_path + '/' + str(label) + '/' + img_name)
+            if i % 10 < threshold:
+                dir_path = dir + '/train'
+            else:
+                dir_path = dir + '/test'
 
-                # Add label to .csv
-                writer = wr_tr if i <= len(img_list) * train_ratio else wr_ts
-                writer.writerow([img_name, label])
-            label = label + 1 if not is_big_class else label
+            image = Image.open(origin_path + '/' + img_name).convert("RGB")
+            image.save(dir_path + '/' + big_str + '/' + img_name)
 
-        label = label + 1 if is_big_class else label
+            # Add label to .csv
+            writer = wr_tr if i <= len(img_list) * train_ratio else wr_ts
+            writer.writerow([img_name, label])
+        label = label + 1 if not is_big_class else label
 
     f_tr.close()
     f_ts.close()
@@ -313,24 +314,24 @@ if __name__ == '__main__':
                         [0]]
     """
 
-    # COLOR_SUBMISSION
-    balanced_list_tr = [[4500, 4500, 0, 0],
-                        [0, 4500, 4500, 0, 0, 0, 0],
-                        [0, 4500, 0, 4500, 0, 0, 0],
-                        [4500, 2700, 0, 900, 900],
-                        [0, 0, 0, 0, 0, 0, 2250, 2250, 4500],
-                        [0]]
-    balanced_list_ts = [[500, 500, 0, 0],
-                        [0, 500, 500, 0, 0, 0, 0],
-                        [0, 500, 0, 500, 0, 0, 0],
-                        [500, 300, 0, 100, 100],
-                        [0, 0, 0, 0, 0, 0, 250, 250, 500],
-                        [0]]
-    construct_mutually_balanced_img_folder(root_dir='/hdd/kkokkobot/FinalEggData/CLASSIFICATION/COLOR_RAW',
-                                           tgt_dir='/hdd/kkokkobot/FinalEggData/CLASSIFICATION/COLOR_SUBMISSION',
-                                           is_big_class=True,
-                                           balanced_list_tr=balanced_list_tr,
-                                           balanced_list_ts=balanced_list_ts)
+    # # COLOR_SUBMISSION
+    # balanced_list_tr = [[4500, 4500, 0, 0],
+    #                     [0, 4500, 4500, 0, 0, 0, 0],
+    #                     [0, 4500, 0, 4500, 0, 0, 0],
+    #                     [4500, 2700, 0, 900, 900],
+    #                     [0, 0, 0, 0, 0, 0, 2250, 2250, 4500],
+    #                     [0]]
+    # balanced_list_ts = [[500, 500, 0, 0],
+    #                     [0, 500, 500, 0, 0, 0, 0],
+    #                     [0, 500, 0, 500, 0, 0, 0],
+    #                     [500, 300, 0, 100, 100],
+    #                     [0, 0, 0, 0, 0, 0, 250, 250, 500],
+    #                     [0]]
+    # construct_mutually_balanced_img_folder(root_dir='/hdd/kkokkobot/FinalEggData/CLASSIFICATION/COLOR_RAW',
+    #                                        tgt_dir='/hdd/kkokkobot/FinalEggData/CLASSIFICATION/COLOR_SUBMISSION',
+    #                                        is_big_class=True,
+    #                                        balanced_list_tr=balanced_list_tr,
+    #                                        balanced_list_ts=balanced_list_ts)
 
     """
     construct_img_folder(root_dir='/hdd/kkokkobot/FinalEggData/CLASSIFICATION/COLOR_RAW',
@@ -387,3 +388,9 @@ if __name__ == '__main__':
     mean, std = batch_mean_and_sd(loader)
     print("mean and std: \n", mean, std)
     """
+
+    construct_img_folder(root_dir='/hdd_ext/kkokkobot/data/Classification/COLOR_RAW',
+                         tgt_dir='/hdd_ext/kkokkobot/data/Classification/COLOR',
+                         is_big_class=True,
+                         train_ratio=0.9)
+

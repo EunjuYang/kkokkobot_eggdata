@@ -1,18 +1,18 @@
 model: swin
 mode: big_class
 exp: COLOR
-run_name: 'SwinTransfor_with_Mixup'
-exp_log: 'Swin-transformer training (with Mixup)'
-dataset_dir: '/hd2/yejyang/kkokkobot/data/COLOR/COLOR_BIG/bigclass'
-pre_trained: './checkpoints/swin/SwinTransfor_with_Mixup/ckp_best.pt'
-base_lr: 0.00001
+run_name: 'Swin_preprocessing_model_with_latent_crack'
+exp_log: 'preprocessing_model_with_latent_crack'
+dataset_dir: '/hdd_ext/kkokkobot/data/Classification/COLOR_w_LatentCrack/bigclass'
+pre_trained: ''
+base_lr: 0.00003
 lr_scheduler: Cosine
 grad_clipping: 1
-n_epochs: 100
-batch_size: 96
+n_epochs: 50
+batch_size: 64
 loss: CrossEntropy
 optim: AdamW
 wd: 0.00000001
-auto_augment: False
-weighted_loss: True
+auto_augment: True
+weighted_loss: False
 is_mixup: True

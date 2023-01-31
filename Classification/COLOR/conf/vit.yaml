@@ -1,14 +1,15 @@
 model: vit
 mode: big_class
 exp: COLOR
-run_name: 'ViT with Mixup with normalization & sharpening'
-exp_log: 'Vision-transformer training (with Mixup) with normalization & sharpening'
-dataset_dir: '/hdd/kkokkobot/FinalEggData/CLASSIFICATION/COLOR_BIG/bigclass'
+run_name: 'ViT for preprocessing (with latent crack)'
+exp_log: 'ViT for preprocessing (with latent crack)'
+dataset_dir: '/hdd_ext/kkokkobot/data/Classification/COLOR_w_LatentCrack/bigclass'
+pre_trained: ''
 base_lr: 0.0001
 lr_scheduler: Cosine
 grad_clipping: 1
-n_epochs: 100
-batch_size: 28
+n_epochs: 50
+batch_size: 64
 loss: CrossEntropy
 optim: AdamW
 wd: 0.00000001

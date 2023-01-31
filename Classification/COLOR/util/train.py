@@ -3,6 +3,8 @@ from tqdm import tqdm
 import numpy as np
 import torch
 import os
+import torch.nn.functional as F
+from sklearn.metrics import roc_auc_score
 
 
 def mixup_data(x, y, alpha=1.0, device='cuda:0'):
@@ -73,6 +75,7 @@ def train(conf, model, dataloaders, criterion, optimizer, lr_scheduler, device, 
                 model.eval()
 
             total_loss, correct, total = 0, 0, 0
+            acc_score, count = 0, 0
 
             with torch.set_grad_enabled(phase == 'train'):
                 for idx, (inputs, labels) in enumerate(dataloaders[phase]):
@@ -84,7 +87,8 @@ def train(conf, model, dataloaders, criterion, optimizer, lr_scheduler, device, 
                         inputs, labels_a, labels_b, lam = mixup_data(inputs, labels)
 
                     outputs = model(inputs)
-                    _, pred = torch.max(outputs, 1)
+                    softmax_output = F.softmax(outputs, dim=-1)
+                    _, pred = torch.max(softmax_output, 1)
 
                     if is_mixup and phase == 'train':
                         loss = mixup_criterion(criterion, outputs, labels_a, labels_b, lam)
@@ -100,16 +104,21 @@ def train(conf, model, dataloaders, criterion, optimizer, lr_scheduler, device, 
                     total += inputs.size(0)
                     correct += torch.sum(pred == labels.data).item()
                     total_loss += loss.item() * inputs.size(0)
+                    # acc_score += roc_auc_score(labels.cpu().data, softmax_output.cpu().data, average='macro', multi_class='ovr')
+                    # count += 1
 
                     # logging
                     log_dict[phase + '_loss'] = total_loss/total
                     log_dict[phase + '_acc'] = correct/total*100
+                    # log_dict[phase + '_roc_auc_score'] = acc_score / count * 100
                     epoch_bar.set_postfix(log_dict)
 
             epoch_acc = correct / total * 100
             epoch_loss = total_loss / total
+            # epoch_acc_score = acc_score / count * 100
             log_metric(phase + " Accuracy", epoch_acc, epoch)
             log_metric(phase + " Loss", epoch_loss, epoch)
+            # log_metric(phase + " RoC AUC", epoch_acc_score, epoch)
 
             if phase == 'train':
                 lr_scheduler.step()
@@ -122,20 +131,50 @@ def train(conf, model, dataloaders, criterion, optimizer, lr_scheduler, device, 
                     best_acc = epoch_acc
                     torch.save(model.state_dict(), './checkpoints/'+conf.model+ '/' + conf.run_name + '/ckp_best.pt')
 
-def test_model(model,test_loader, device):
+def evaluate(model, test_loader, device, dataset, label_name):
     correct,total = 0,0
+    count, acc_score = 0, 0
+    idx = 0
     model.eval()
     with torch.no_grad():
         for images, labels in test_loader:
             images = images.to(device)
             labels = labels.to(device)
             outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
+            softmax_output = F.softmax(outputs, dim=-1)
+            _, predicted = torch.max(softmax_output.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+            count += 1
+            for r in predicted.data:
+                print(dataset.imgs[idx][0], label_name[r.data])
+                idx += 1
+
 
     print('Accuracy of the model on the test images: {} %'.format(100 * correct / total))
+    # print('Accuracy of the model on the test images (RoC-AuC score): {} %'.format(100 * acc_score / count))
     log_metric("test_acc", 100 * correct/total)
+
+def test_model(model,test_loader, device):
+    correct,total = 0,0
+    count, acc_score = 0, 0
+    model.eval()
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+            outputs = model(images)
+            softmax_output = F.softmax(outputs, dim=-1)
+            _, predicted = torch.max(softmax_output.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+            # acc_score += roc_auc_score(labels.cpu().data, softmax_output.cpu().data, average='macro', multi_class='ovr')
+            # count += 1
+
+    print('Accuracy of the model on the test images: {} %'.format(100 * correct / total))
+    # print('Accuracy of the model on the test images (RoC-AuC score): {} %'.format(100 * acc_score / count))
+    log_metric("test_acc", 100 * correct/total)
+    # log_metric("test_roc_auc_score", 100 * acc_score / count)
 
 def save_model(out_dir, name, model):
     model_to_save = model.module if hasattr(model, 'module') else model
